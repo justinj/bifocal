@@ -57,6 +57,10 @@ export function fromPath(path) {
   );
 }
 
+export function map(lens, f, structure) {
+  return lift(lens, f)(structure);
+}
+
 // This works, not convinced it's valuable to expose it yet though.
 function compose(a, b, ...rest) {
   if (b === undefined) {

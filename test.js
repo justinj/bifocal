@@ -1,9 +1,8 @@
 import assert from 'assert';
-import { createLens, lift, fromPath, compose } from './index';
+import { createLens, lift, fromPath, map } from './index';
 
 let aPeek = obj => obj.a;
 let aSet = (obj, a) => ({...obj, a});
-
 let aLens = createLens(aPeek, aSet);
 
 describe('raw uses of lens', function() {
@@ -48,6 +47,16 @@ describe('fromPath', function() {
 
     assert.equal(lens(obj), 1);
     assert.deepEqual(lens(obj, 3), { a: { b: 3 }});
+  });
+});
+
+describe('map', function() {
+  it('operates on the substructure', function() {
+    let obj = { a: 1 };
+    assert.deepEqual(
+      map(aLens, x => 2, obj),
+      { a: 2 }
+    );
   });
 });
 
