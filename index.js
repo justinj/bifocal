@@ -24,14 +24,16 @@ export function lift(lens, f) {
 function peekPath(path, obj) {
   let value = obj;
   for (let i = 0; i < path.length; i++) {
-    if (!value.hasOwnProperty(path[i])) {
-      throw new Error(
-        'Lens ' +
-        JSON.stringify(path) +
-        ' was not valid in object ' +
-        JSON.stringify(obj) +
-        ' (' + path[i] + ')'
-      );
+    if (value === undefined || !value.hasOwnProperty(path[i])) {
+      return undefined;
+      // I actually think undefined is correct.
+      // throw new Error(
+      //   'Lens ' +
+      //   JSON.stringify(path) +
+      //   ' was not valid in object ' +
+      //   JSON.stringify(obj) +
+      //   ' (' + path[i] + ')'
+      // );
     }
     value = value[path[i]];
   }
@@ -43,6 +45,7 @@ function setPath(path, obj, val) {
     return val;
   } else {
     let [fst, ...rst] = path;
+    obj = obj || {};
     return {
       ...obj,
       [fst]: setPath(rst, obj[fst], val)
@@ -59,6 +62,26 @@ export function fromPath(path) {
 
 export function map(lens, f, structure) {
   return lift(lens, f)(structure);
+}
+
+export function liftReducer(read, write, f) {
+  return (state, action) => {
+    return write(
+      state,
+      f(read(state), write(state), action)
+    );
+  };
+}
+
+export function composeLensReducers(first, ...rest) {
+  if (rest.length === 0) {
+    return first;
+  } else {
+    let remainder = composeLensReducers(...rest);
+    return (state, action) => {
+      return first(remainder(state, action), action);
+    };
+  }
 }
 
 // This works, not convinced it's valuable to expose it yet though.

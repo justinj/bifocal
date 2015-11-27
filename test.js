@@ -1,5 +1,12 @@
 import assert from 'assert';
-import { createLens, lift, fromPath, map } from './index';
+import {
+  createLens,
+  lift,
+  fromPath,
+  map,
+  liftReducer,
+  composeLensReducers
+} from './index';
 
 let aPeek = obj => obj.a;
 let aSet = (obj, a) => ({...obj, a});
@@ -37,16 +44,21 @@ describe('lift', function() {
 });
 
 describe('fromPath', function() {
-  it('creates a lens based on a path of keys in objects', function() {
-    let obj = {
-      a: {
-        b: 1
-      }
+  let obj = {
+    a: {
+      b: 1
     }
-    let lens = fromPath(['a', 'b'])
+  }
+  let lens = fromPath(['a', 'b'])
 
+  it('creates a lens based on a path of keys in objects', function() {
     assert.equal(lens(obj), 1);
     assert.deepEqual(lens(obj, 3), { a: { b: 3 }});
+  });
+
+  it('is safe', function() {
+    assert.equal(lens({}), undefined);
+    assert.deepEqual(lens({}, 3), { a: { b: 3 }});
   });
 });
 
@@ -60,8 +72,74 @@ describe('map', function() {
   });
 });
 
+describe('lens reducers', function() {
+  let obj = {
+    sum: 1,
+    product: 2
+  };
+
+  let sumLens = fromPath(['sum']);
+  let productLens = fromPath(['product']);
+
+  let sum = (readableState, writableState, action) => {
+    if (writableState === undefined) {
+      return 0;
+    } else {
+      return readableState + writableState + action.value;
+    }
+  };
+
+  let product = (readableState, writableState, action) => {
+    if (writableState === undefined) {
+      return 1;
+    } else {
+      return readableState * writableState * action.value;
+    }
+  };
+
+  let sumReducer = liftReducer(productLens, sumLens, sum);
+  let productReducer = liftReducer(sumLens, productLens, product);
+
+  describe('liftReducer', function() {
+    it('creates a reducer which reads from the root state', function() {
+      assert.deepEqual(
+        sumReducer(obj, { type: 'ACT', value: 4 }),
+        { sum: 7, product: 2 }
+      );
+    });
+
+    it('is still a well-behaved reducer', function() {
+      assert.deepEqual(
+        sumReducer({}, { type: 'init' }),
+        { sum: 0 }
+      );
+    });
+  });
+
+  describe('composeLensReducers', function() {
+    let composed = composeLensReducers(
+      sumReducer,
+      productReducer
+    );
+
+    it('applies each in turn', function() {
+      assert.deepEqual(
+        composed(obj, { type: 'ACT', value: 4 }),
+        { product: 8, sum: 13 }
+      );
+    });
+
+    it('behaves nicely with respect to initial value', function() {
+      assert.deepEqual(
+        composed(undefined, { type: 'init' }),
+        { sum: 0, product: 1 }
+      );
+    });
+  });
+});
+
+// This is cool but I'm not convinced it's useful for my purposes yet
 describe.skip('compose', function() {
-  // This is cool but I'm not convinced it's useful for my purposes yet
   it('composes two lenses', function() {
     let aLens = fromPath(['a']);
     let bLens = fromPath(['b']);
