@@ -1,10 +1,10 @@
 export function createLens(peek, set) {
-  return function(rootStructure, subStructure) {
-    if (subStructure === undefined) {
-      return peek(rootStructure);
+  return function(value, focus) {
+    if (focus === undefined) {
+      return peek(value);
     } else {
       if (set) {
-        return set(rootStructure, subStructure);
+        return set(value, focus);
       } else {
         throw new Error('Trying to set read-only lens');
       }
@@ -15,9 +15,9 @@ export function createLens(peek, set) {
 export function lift(lens, f) {
   return function() {
     let args = Array.prototype.slice.call(arguments);
-    let structure = args[0];
+    let value = args[0];
     args[0] = lens(args[0]);
-    return lens(structure, f.apply(null, args));
+    return lens(value, f.apply(null, args));
   }
 }
 
@@ -55,13 +55,13 @@ function setPath(path, obj, val) {
 
 export function fromPath(path) {
   return createLens(
-    structure => peekPath(path, structure),
-    (structure, substructure) => setPath(path, structure, substructure)
+    value => peekPath(path, value),
+    (value, focus) => setPath(path, value, focus)
   );
 }
 
-export function map(lens, f, structure) {
-  return lift(lens, f)(structure);
+export function map(lens, f, value) {
+  return lift(lens, f)(value);
 }
 
 export function liftReducer(read, write, f) {
@@ -111,8 +111,8 @@ function compose(a, b, ...rest) {
   } else {
     return compose(
       createLens(
-        structure => b(a(structure)),
-        (structure, substructure) => a(structure, b(a(structure), substructure))
+        value => b(a(value)),
+        (value, focus) => a(value, b(a(value), focus))
       ),
       ...rest
     );
