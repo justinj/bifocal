@@ -1,6 +1,7 @@
 import assert from 'assert';
 import {
   createLens,
+  createLensMemoized,
   lift,
   fromPath,
   map,
@@ -21,6 +22,24 @@ describe('raw uses of lens', function() {
 
   it('sets a substructure if one is given', function() {
     assert.deepEqual(aLens({ a: 1 }, 2), { a: 2 });
+  });
+});
+
+describe('createLensMemoized', function () {
+  it('caches one invocation of the lens', function() {
+    let invoked = false;
+    let aPeek = obj => {
+      if (invoked) assert(false, "Function called more than once!");
+      invoked = true;
+      return obj.a;
+    };
+    let aSet = (obj, a) => ({...obj, a});
+    let aLens = createLensMemoized(aPeek, aSet);
+    let obj = {
+      a: 2
+    };
+    assert.equal(2, aLens(obj));
+    aLens(obj);
   });
 });
 

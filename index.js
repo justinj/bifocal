@@ -12,6 +12,19 @@ export function createLens(peek, set) {
   }
 }
 
+export function createLensMemoized(peek, set) {
+  let cachedInput;
+  let cachedOutput;
+  let memoPeek = (v) => {
+    if (v !== cachedInput) {
+      cachedInput = v;
+      cachedOutput = peek(v);
+    }
+    return cachedOutput;
+  };
+  return createLens(memoPeek, set);
+}
+
 export function lift(lens, f) {
   return function() {
     let args = Array.prototype.slice.call(arguments);
