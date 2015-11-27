@@ -5,7 +5,8 @@ import {
   fromPath,
   map,
   liftReducer,
-  composeLensReducers
+  composeLensReducers,
+  combineLenses
 } from './index';
 
 let aPeek = obj => obj.a;
@@ -135,6 +136,27 @@ describe('lens reducers', function() {
         { sum: 0, product: 1 }
       );
     });
+  });
+});
+
+describe('combineLenses', function() {
+  it('behaves just like combineReducers', function() {
+    let aLens = fromPath(['a']);
+    let bLens = fromPath(['b']);
+    let cLens = combineLenses({
+      a: aLens,
+      b: bLens
+    });
+
+    assert.deepEqual(
+      cLens({ a: 1, b: 2, c: 3 }),
+      { a: 1, b: 2 }
+    );
+
+    assert.deepEqual(
+      cLens({ a: 1, b: 2, c: 3 }, { a: 3, b: 8 }),
+      { a: 3, b: 8, c: 3 }
+    );
   });
 });
 

@@ -84,6 +84,26 @@ export function composeLensReducers(first, ...rest) {
   }
 }
 
+export function combineLenses(lenses) {
+  let keys = Object.keys(lenses);
+  let peek = value => {
+    let obj = {};
+    keys.forEach(k => obj[k] = lenses[k](value));
+    return obj;
+  };
+
+  let set = (value, focus) =>
+    keys.reduce(
+      (v, k) => lenses[k](v, lenses[k](focus)),
+      value
+    );
+
+  return createLens(
+    peek,
+    set
+  );
+}
+
 // This works, not convinced it's valuable to expose it yet though.
 function compose(a, b, ...rest) {
   if (b === undefined) {
