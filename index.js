@@ -76,11 +76,15 @@ export function map(lens, f, value) {
   return lift(lens, f)(value);
 }
 
+// Really unhappy including this, not sure of another way around it though
+// We can't do the read
+const INITIAL_ACTION = '@@redux/INIT';
+
 export function liftReducer(read, write, f) {
   return (state, action) => {
     return write(
       state,
-      f(read(state), write(state), action)
+      f(action.type === INITIAL_ACTION ? undefined : read(state), write(state), action)
     );
   };
 }

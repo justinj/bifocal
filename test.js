@@ -138,6 +138,15 @@ describe('lens reducers', function() {
         { sum: 0 }
       );
     });
+
+    it('does not attempt to read from the root state when write state = undefined', function() {
+      let shouldntBeCalled = createLens(() => assert(false, "I shouldn't have been called!"));
+      let reducer = liftReducer(shouldntBeCalled, sumLens, sum);
+      assert.deepEqual(
+        reducer({}, { type: '@@redux/INIT' }),
+        { sum: 0 }
+      );
+    });
   });
 
   describe('composeLensReducers', function() {
