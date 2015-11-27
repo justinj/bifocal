@@ -6,7 +6,8 @@ import {
   map,
   liftReducer,
   composeLensReducers,
-  combineLenses
+  combineLenses,
+  compose
 } from './index';
 
 let aPeek = obj => obj.a;
@@ -41,6 +42,28 @@ describe('lift', function() {
     };
 
     assert.deepEqual(lifted({ a: 1 }, action), { a: 3 });
+  });
+});
+
+describe('compose', function() {
+  it('composes two lenses', function() {
+    let aLens = fromPath(['a']);
+    let bLens = fromPath(['b']);
+    let abLens = compose(bLens, aLens); // should be equivalent to fromPath(['a', 'b'])
+
+    assert.equal(abLens({ a: { b: 1 }}), 1);
+
+    assert.deepEqual(abLens({ a: { b: 1 }}, 2), { a: { b: 2 }});
+  });
+
+  it('composes arbitrarily many lenses', function() {
+    let aLens = fromPath(['a']);
+    let bLens = fromPath(['b']);
+    let cLens = fromPath(['c']);
+    let abcLens = compose(cLens, bLens, aLens);
+
+    assert.equal(abcLens({ a: { b: { c: 1 }}}), 1);
+    assert.deepEqual(abcLens({ a: { b: { c: 1 }}}, 2), { a: { b: { c: 2 }}});
   });
 });
 
@@ -160,25 +183,3 @@ describe('combineLenses', function() {
   });
 });
 
-// This is cool but I'm not convinced it's useful for my purposes yet
-describe.skip('compose', function() {
-  it('composes two lenses', function() {
-    let aLens = fromPath(['a']);
-    let bLens = fromPath(['b']);
-    let abLens = compose(aLens, bLens); // should be equivalent to fromPath(['a', 'b'])
-
-    assert.equal(abLens({ a: { b: 1 }}), 1);
-
-    assert.deepEqual(abLens({ a: { b: 1 }}, 2), { a: { b: 2}});
-  });
-
-  it('composes arbitrarily many lenses', function() {
-    let aLens = fromPath(['a']);
-    let bLens = fromPath(['b']);
-    let cLens = fromPath(['c']);
-    let abcLens = compose(aLens, bLens, cLens);
-
-    assert.equal(abcLens({ a: { b: { c: 1 }}}), 1);
-    assert.deepEqual(abcLens({ a: { b: { c: 1 }}}, 2), { a: { b: { c: 2 }}});
-  });
-});

@@ -21,6 +21,18 @@ export function lift(lens, f) {
   }
 }
 
+export function compose(l, ...rest) {
+  if (rest.length === 0) {
+    return l;
+  } else {
+    let others = compose(...rest);
+    return createLens(
+      value => l(others(value)),
+      (value, focus) => others(value, l(others(value), focus))
+    )
+  }
+}
+
 function peekPath(path, obj) {
   let value = obj;
   for (let i = 0; i < path.length; i++) {
@@ -102,19 +114,4 @@ export function combineLenses(lenses) {
     peek,
     set
   );
-}
-
-// This works, not convinced it's valuable to expose it yet though.
-function compose(a, b, ...rest) {
-  if (b === undefined) {
-    return a;
-  } else {
-    return compose(
-      createLens(
-        value => b(a(value)),
-        (value, focus) => a(value, b(a(value), focus))
-      ),
-      ...rest
-    );
-  }
 }
