@@ -3,11 +3,7 @@ export function createLens(peek, set) {
     if (focus === undefined) {
       return peek(value);
     } else {
-      if (set) {
-        return set(value, focus);
-      } else {
-        throw new Error('Trying to set read-only lens');
-      }
+      return set(value, focus);
     }
   }
 }
@@ -51,14 +47,6 @@ function peekPath(path, obj) {
   for (let i = 0; i < path.length; i++) {
     if (value === undefined || !value.hasOwnProperty(path[i])) {
       return undefined;
-      // I actually think undefined is correct.
-      // throw new Error(
-      //   'Lens ' +
-      //   JSON.stringify(path) +
-      //   ' was not valid in object ' +
-      //   JSON.stringify(obj) +
-      //   ' (' + path[i] + ')'
-      // );
     }
     value = value[path[i]];
   }
@@ -87,30 +75,6 @@ export function fromPath(path) {
 
 export function map(lens, f, value) {
   return lift(lens, f)(value);
-}
-
-// Really unhappy including this, not sure of another way around it though
-// We can't do the read
-const INITIAL_ACTION = '@@redux/INIT';
-
-export function liftReducer(read, write, f) {
-  return (state, action) => {
-    return write(
-      state,
-      f(action.type === INITIAL_ACTION ? undefined : read(state), write(state), action)
-    );
-  };
-}
-
-export function composeLensReducers(first, ...rest) {
-  if (rest.length === 0) {
-    return first;
-  } else {
-    let remainder = composeLensReducers(...rest);
-    return (state, action) => {
-      return first(remainder(state, action), action);
-    };
-  }
 }
 
 export function combineLenses(lenses) {
