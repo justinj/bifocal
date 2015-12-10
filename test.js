@@ -4,12 +4,12 @@ import {
   createLensMemoized,
   lift,
   fromPath,
+  fromPathImmutable,
   map,
-  liftReducer,
-  composeLensReducers,
   combineLenses,
   compose
 } from './index';
+import * as Immutable from 'immutable';
 
 let aPeek = obj => obj.a;
 let aSet = (obj, a) => ({...obj, a});
@@ -66,9 +66,9 @@ describe('lift', function() {
 
 describe('compose', function() {
   it('composes two lenses', function() {
-    let aLens = fromPath(['a']);
-    let bLens = fromPath(['b']);
-    let abLens = compose(bLens, aLens); // should be equivalent to fromPath(['a', 'b'])
+    let aLens = fromPath('a');
+    let bLens = fromPath('b');
+    let abLens = compose(bLens, aLens); // should be equivalent to fromPath('a', 'b')
 
     assert.equal(abLens({ a: { b: 1 }}), 1);
 
@@ -76,9 +76,9 @@ describe('compose', function() {
   });
 
   it('composes arbitrarily many lenses', function() {
-    let aLens = fromPath(['a']);
-    let bLens = fromPath(['b']);
-    let cLens = fromPath(['c']);
+    let aLens = fromPath('a');
+    let bLens = fromPath('b');
+    let cLens = fromPath('c');
     let abcLens = compose(cLens, bLens, aLens);
 
     assert.equal(abcLens({ a: { b: { c: 1 }}}), 1);
@@ -90,18 +90,42 @@ describe('fromPath', function() {
   let obj = {
     a: {
       b: 1
-    }
+    },
+    c: 2
   }
-  let lens = fromPath(['a', 'b'])
+  let lens = fromPath('a', 'b')
 
   it('creates a lens based on a path of keys in objects', function() {
     assert.equal(lens(obj), 1);
-    assert.deepEqual(lens(obj, 3), { a: { b: 3 }});
+    assert.deepEqual(lens(obj, 3), { a: { b: 3 }, c: 2 });
   });
 
   it('is safe', function() {
     assert.equal(lens({}), undefined);
     assert.deepEqual(lens({}, 3), { a: { b: 3 }});
+  });
+});
+
+describe('fromPathImmutable', function() {
+  let map = Immutable.fromJS({
+    a: {
+      b: 1
+    },
+    c: 2
+  });
+  let lens = fromPathImmutable('a', 'b');
+
+  it('creates a lens based on a path of keys', function() {
+    assert.equal(lens(map), 1);
+    assert.deepEqual(
+      lens(map, 3).toJS(),
+      {
+        a: {
+          b: 3
+        },
+        c: 2
+      }
+    );
   });
 });
 
@@ -117,8 +141,8 @@ describe('map', function() {
 
 describe('combineLenses', function() {
   it('behaves just like combineReducers', function() {
-    let aLens = fromPath(['a']);
-    let bLens = fromPath(['b']);
+    let aLens = fromPath('a');
+    let bLens = fromPath('b');
     let cLens = combineLenses({
       a: aLens,
       b: bLens
@@ -135,4 +159,3 @@ describe('combineLenses', function() {
     );
   });
 });
-

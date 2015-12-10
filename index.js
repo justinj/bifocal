@@ -66,10 +66,17 @@ function setPath(path, obj, val) {
   }
 }
 
-export function fromPath(path) {
+export function fromPath(...path) {
   return createLens(
     value => peekPath(path, value),
     (value, focus) => setPath(path, value, focus)
+  );
+}
+
+export function fromPathImmutable(...path) {
+  return createLens(
+    value => value.getIn(path),
+    (value, focus) => value.setIn(path, focus)
   );
 }
 
