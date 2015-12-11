@@ -22,11 +22,8 @@ export function createLensMemoized(peek, set) {
 }
 
 export function lift(lens, f) {
-  return function() {
-    let args = Array.prototype.slice.call(arguments);
-    let value = args[0];
-    args[0] = lens(args[0]);
-    return lens(value, f.apply(null, args));
+  return function(value, ...rest) {
+    return lens(value, f(lens(value), ...rest));
   }
 }
 
