@@ -1,7 +1,7 @@
 {
-  "name": "delux",
+  "name": "perspective",
   "version": "1.0.0",
-  "description": "Lens library for Redux",
+  "description": "Tiny abstract lens library",
   "main": "index.js",
   "scripts": {
     "test": "mocha --compilers js:babel-core/register"
