@@ -1,6 +1,15 @@
+// A convenience helper to create a lens. If you want to you can just create
+// the functions directly, but this lets you avoid the logic of checking for
+// undefined parameters.
+//
+// Example: A lens which looks at an objects 'a' property
+//   let aLens = createLens(
+//     obj => obj.a,
+//     (obj, a) => ({...obj, a})
+//   );
 export function createLens(peek, set) {
   return function(value, focus) {
-    if (focus === undefined) {
+    if (arguments.length === 1) {
       return peek(value);
     } else {
       return set(value, focus);
@@ -8,6 +17,9 @@ export function createLens(peek, set) {
   }
 }
 
+// The same as createLens, however it will cache one invocation of the lens,
+// which in certain cases might be beneficial. Should not be used unless the
+// data being checked is not being mutated.
 export function createLensMemoized(peek, set) {
   let cachedInput;
   let cachedOutput;
@@ -21,12 +33,28 @@ export function createLensMemoized(peek, set) {
   return createLens(memoPeek, set);
 }
 
+// "Lift" `f` into the world of `lens`.
+// If L is a lens from A to B, and F is a function from B -> B, then lift(L, F)
+// is a function from A -> A.
+// Example:
+//   const sqr = x => x * x;
+//   const sqrA = lift(aLens, sqr)
+//   sqrA({ a: 2 }); // => { a: 4 }
 export function lift(lens, f) {
   return function(value, ...rest) {
     return lens(value, f(lens(value), ...rest));
   }
 }
 
+// Compose a sequence of lenses, from right to left.
+// Example:
+//   let abLens = compose(
+//     bLens, // accesses an object's 'b' property
+//     aLens  // accesses an object's 'a' property
+//   );
+//
+//   abLens({ a: { b: 3 }}); // => 3
+//   abLens({ a: { b: 3 }}, 4); // => { a: { b: 4 }}
 export function compose(l, ...rest) {
   if (rest.length === 0) {
     return l;
@@ -63,6 +91,16 @@ function setPath(path, obj, val) {
   }
 }
 
+// Create a lens which looks into a deeply nested object.
+// Example:
+//   let abLens = fromPath('a', 'b');
+//
+//   abLens({ a: { b: 3 }}); // => 3
+//   abLens({ a: { b: 3 }}, 4); // => { a: { b: 4 }}
+//
+// You might note that these go in reverse order to composition.
+// This is to mimic property access (x.a.b) which goes in reverse order to
+// function application (b(a(x))).
 export function fromPath(...path) {
   return createLens(
     value => peekPath(path, value),
@@ -70,6 +108,7 @@ export function fromPath(...path) {
   );
 }
 
+// Like fromPath, but for collections from immutableJS.
 export function fromPathImmutable(...path) {
   return createLens(
     value => value.getIn(path),
@@ -77,10 +116,42 @@ export function fromPathImmutable(...path) {
   );
 }
 
+// Map a function over a lens. Equivalent to lifting and then applying.
+// Example:
+//   map(aLens, sqr, { a: 2 }); // => { a: 4 }
 export function map(lens, f, value) {
   return lift(lens, f)(value);
 }
 
+// Given an object of lenses, creates a lens which gives an object with the
+// same structure, with the value of each lens as its values.
+// Note that the lenses should commute (not overlap) for this to
+// work in a reasonable way.
+// Example:
+//   const lens = combineLenses({
+//     a: fromPath('hello'),
+//     b: fromPath('goodbye', 'farewell')
+//   });
+//
+//   lens({
+//     hello: 1,
+//     goodbye: {
+//       farewell: 2
+//     }
+//   }); // => { a: 1, b: 2 }
+//
+//   lens({
+//     hello: 1,
+//     goodbye: {
+//       farewell: 2
+//     }
+//   }, { a: 3, b: 4 });
+//   => {
+//     hello: 3,
+//     goodbye: {
+//       farewell: 4
+//     }
+//   }
 export function combineLenses(lenses) {
   let keys = Object.keys(lenses);
   let peek = value => {
