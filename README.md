@@ -59,18 +59,16 @@ When given two, it returns the result of inserting the second argument into the 
 Usage
 =====
 
-##A Quick Example
-
 ```javascript
 import {
   createLens,
   lift
 } from 'bifocal';
 
-// A lens which gets and sets the `a` property of some object
-let aPeek = obj => obj.a;
-let aSet = (obj, a) => ({...obj, a});
-let aLens = createLens(aPeek, aSet);
+// A lens which gets and puts the `a` property of some object
+let aGet = obj => obj.a;
+let aPut = (obj, a) => ({...obj, a});
+let aLens = createLens(aGet, aPut);
 
 aLens({ a: 1 }); // => 1
 aLens({ a: 1 }, 2); // => { a: 2 }
@@ -85,19 +83,33 @@ See `test.js` for more detailed examples.
 
 ##API
 
-###`createLens(peek, set)`
+###`createLens(get, put)`
 
 A convenience helper to create a lens. If you want to you can just create
-the functions directly, but this lets you avoid the logic of checking for
-undefined parameters.
+the lenses directly, but this lets you avoid the logic of checking the
+number of arguments.
 
-Example: A lens which looks at an objects 'a' property
+Example: A lens which looks at an object's `a` property
 
 ```javascript
 let aLens = createLens(
   obj => obj.a,
   (obj, a) => ({...obj, a})
 );
+```
+###`compose(...lenses)`
+
+Compose a sequence of lenses from right to left.
+
+Example:
+```
+let abLens = compose(
+  bLens, // accesses an object's 'b' property
+  aLens  // accesses an object's 'a' property
+);
+
+abLens({ a: { b: 3 }}); // => 3
+abLens({ a: { b: 3 }}, 4); // => { a: { b: 4 }}
 ```
 
 ###`fromPath(...path)`
@@ -128,21 +140,6 @@ Example:
 const sqr = x => x * x;
 const sqrA = lift(aLens, sqr)
 sqrA({ a: 2 }); // => { a: 4 }
-```
-
-###`compose(...lenses)`
-
-Compose a sequence of lenses from right to left.
-
-Example:
-```
-let abLens = compose(
-  bLens, // accesses an object's 'b' property
-  aLens  // accesses an object's 'a' property
-);
-
-abLens({ a: { b: 3 }}); // => 3
-abLens({ a: { b: 3 }}, 4); // => { a: { b: 4 }}
 ```
 
 ###`over(lens, f, value)
@@ -192,7 +189,7 @@ lens({
 
 ###`fromPathImmutable(...path)`
 
-// Like fromPath, but for collections from immutableJS.
+Like fromPath, but for collections from [ImmutableJS](https://github.com/facebook/immutable-js).
 
 ##Extra Stuff
 
@@ -202,7 +199,7 @@ You don't need to read this, but it might be interesting/helpful.
 
 You might notice that we can't use any old functions with `createLens` to get a
 lens that always works properly.
-For example, what if our setter put the value back in a different place than the getter looked?
+For example, what if our putter put the value back in a different place than the getter looked?
 
 ```javascript
 const what = createLens(

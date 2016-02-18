@@ -1,47 +1,10 @@
-export function createLens(peek, set) {
+export function createLens(get, put) {
   return function(value, focus) {
     if (arguments.length === 1) {
-      return peek(value);
+      return get(value);
     } else {
-      return set(value, focus);
+      return put(value, focus);
     }
-  }
-}
-
-function peekPath(path, obj) {
-  let value = obj;
-  for (let i = 0; i < path.length; i++) {
-    if (value === undefined || !value.hasOwnProperty(path[i])) {
-      return undefined;
-    }
-    value = value[path[i]];
-  }
-  return value;
-}
-
-function setPath(path, obj, val) {
-  if (path.length === 0) {
-    return val;
-  } else {
-    let [fst, ...rst] = path;
-    obj = obj || {};
-    return {
-      ...obj,
-      [fst]: setPath(rst, obj[fst], val)
-    }
-  }
-}
-
-export function fromPath(...path) {
-  return createLens(
-    value => peekPath(path, value),
-    (value, focus) => setPath(path, value, focus)
-  );
-}
-
-export function lift(lens, f) {
-  return function(value, ...rest) {
-    return lens(value, f(lens(value), ...rest));
   }
 }
 
@@ -57,27 +20,64 @@ export function compose(l, ...rest) {
   }
 }
 
+function getPath(path, obj) {
+  let value = obj;
+  for (let i = 0; i < path.length; i++) {
+    if (value === undefined || !value.hasOwnProperty(path[i])) {
+      return undefined;
+    }
+    value = value[path[i]];
+  }
+  return value;
+}
+
+function putPath(path, obj, val) {
+  if (path.length === 0) {
+    return val;
+  } else {
+    let [fst, ...rst] = path;
+    obj = obj || {};
+    return {
+      ...obj,
+      [fst]: putPath(rst, obj[fst], val)
+    }
+  }
+}
+
+export function fromPath(...path) {
+  return createLens(
+    value => getPath(path, value),
+    (value, focus) => putPath(path, value, focus)
+  );
+}
+
+export function lift(lens, f) {
+  return function(value, ...rest) {
+    return lens(value, f(lens(value), ...rest));
+  }
+}
+
 export function over(lens, f, value) {
   return lift(lens, f)(value);
 }
 
 export function combineLenses(lenses) {
   let keys = Object.keys(lenses);
-  let peek = value => {
+  let get = value => {
     let obj = {};
     keys.forEach(k => obj[k] = lenses[k](value));
     return obj;
   };
 
-  let set = (value, focus) =>
+  let put = (value, focus) =>
     keys.reduce(
       (v, k) => lenses[k](v, focus[k]),
       value
     );
 
   return createLens(
-    peek,
-    set
+    get,
+    put
   );
 }
 
