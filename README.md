@@ -194,13 +194,9 @@ lens({
 
 // Like fromPath, but for collections from immutableJS.
 
-###`createLensMemoized(peek, set)`
-
-The same as createLens, however it will cache one invocation of the lens,
-which in certain cases might be beneficial. Should not be used unless the
-data being checked is not being mutated.
-
 ##Extra Stuff
+
+You don't need to read this, but it might be interesting/helpful.
 
 ###Lenses that make sense
 

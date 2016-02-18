@@ -87,17 +87,3 @@ export function fromPathImmutable(...path) {
     (value, focus) => value.setIn(path, focus)
   );
 }
-
-export function createLensMemoized(peek, set) {
-  let cachedInput;
-  let cachedOutput;
-  let memoPeek = (v) => {
-    if (v !== cachedInput) {
-      cachedInput = v;
-      cachedOutput = peek(v);
-    }
-    return cachedOutput;
-  };
-  return createLens(memoPeek, set);
-}
-
