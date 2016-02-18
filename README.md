@@ -1,11 +1,11 @@
-Perspective
-===========
+Bifocal
+=======
 
 Install
 =======
 
 ```bash
-$ npm install --save perspective
+$ npm install --save bifocal
 ```
 
 Usage
@@ -23,7 +23,7 @@ When given two, it returns the result of inserting the second argument into the 
 import {
   createLens,
   lift
-} from 'perspective';
+} from 'bifocal';
 
 // A lens which gets and sets the `a` property of some object
 let aPeek = obj => obj.a;

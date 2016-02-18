@@ -1,5 +1,5 @@
 {
-  "name": "perspective",
+  "name": "bifocal",
   "version": "1.0.0",
   "description": "Tiny abstract lens library",
   "main": "index.js",
@@ -7,7 +7,7 @@
     "test": "mocha --compilers js:babel-core/register"
   },
   "keywords": [
-    "redux"
+    "lens"
   ],
   "author": "Justin Jaffray",
   "license": "MIT",
