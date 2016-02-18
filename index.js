@@ -116,10 +116,11 @@ export function fromPathImmutable(...path) {
   );
 }
 
-// Map a function over a lens. Equivalent to lifting and then applying.
+// Apply a function `over` a lens. Equivalent to lifting and then applying.
+// Conceptually similar to `map`.
 // Example:
-//   map(aLens, sqr, { a: 2 }); // => { a: 4 }
-export function map(lens, f, value) {
+//   over(aLens, sqr, { a: 2 }); // => { a: 4 }
+export function over(lens, f, value) {
   return lift(lens, f)(value);
 }
 

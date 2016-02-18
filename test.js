@@ -5,7 +5,7 @@ import {
   lift,
   fromPath,
   fromPathImmutable,
-  map,
+  over,
   combineLenses,
   compose
 } from './index';
@@ -129,11 +129,11 @@ describe('fromPathImmutable', function() {
   });
 });
 
-describe('map', function() {
+describe('over', function() {
   it('operates on the substructure', function() {
     let obj = { a: 1 };
     assert.deepEqual(
-      map(aLens, x => 2, obj),
+      over(aLens, x => 2, obj),
       { a: 2 }
     );
   });
