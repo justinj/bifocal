@@ -161,3 +161,65 @@ describe('combineLenses', function() {
     );
   });
 });
+
+
+
+describe('README examples', function() {
+  describe('negationLens', function() {
+    it('works as the example shows', function() {
+      const negationLens = createLens(
+        x => -x,
+        (_, x) => -x
+      );
+
+      assert.equal(
+        4,
+        over(negationLens, x => x + 1, 5)
+      );
+    });
+  });
+
+  describe('arrayLens', function() {
+    it('works as the example shows', function() {
+      const arrayLens = createLens(
+        s => s.split(''),
+        (_, a) => a.join('')
+      );
+
+      assert.equal(
+        'olleh',
+        over(arrayLens, x => x.slice().reverse(), 'hello')
+      );
+    });
+  });
+
+  describe('division algorithm', function() {
+    it('works as the example shows', function() {
+      // represents division by `m`
+      function division(m) {
+        const quotient = n => Math.floor(n / m);
+        const remainder = n => n % m;
+        const quotientLens = createLens(
+          n => quotient(n),
+          (n, q) => q * m + remainder(n)
+        );
+        const remainderLens = createLens(
+          n => remainder(n),
+          (n, r) => quotient(n) * m + r
+        );
+        return {
+          quotientLens,
+          remainderLens
+        };
+      }
+
+      const { quotientLens, remainderLens } = division(100);
+
+      assert.equal(1, quotientLens(105));
+      assert.equal(5, remainderLens(105));
+
+      assert.equal(205, quotientLens(105, 2));
+      assert.equal(127, remainderLens(105, 27));
+    });
+  });
+});
