@@ -91,7 +91,7 @@ export function combineLenses(lenses) {
 
   let set = (value, focus) =>
     keys.reduce(
-      (v, k) => lenses[k](v, lenses[k](focus)),
+      (v, k) => lenses[k](v, focus[k]),
       value
     );
 

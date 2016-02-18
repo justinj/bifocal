@@ -143,19 +143,21 @@ describe('combineLenses', function() {
   it('behaves just like combineReducers', function() {
     let aLens = fromPath('a');
     let bLens = fromPath('b');
-    let cLens = combineLenses({
+    let cLens = fromPath('c');
+    let lens = combineLenses({
       a: aLens,
-      b: bLens
+      b: bLens,
+      d: cLens
     });
 
     assert.deepEqual(
-      cLens({ a: 1, b: 2, c: 3 }),
-      { a: 1, b: 2 }
+      lens({ a: 1, b: 2, c: 3 }),
+      { a: 1, b: 2, d: 3 }
     );
 
     assert.deepEqual(
-      cLens({ a: 1, b: 2, c: 3 }, { a: 3, b: 8 }),
-      { a: 3, b: 8, c: 3 }
+      lens({ a: 1, b: 2, c: 3 }, { a: 3, b: 8, d: 12 }),
+      { a: 3, b: 8, c: 12 }
     );
   });
 });
