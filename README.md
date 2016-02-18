@@ -62,6 +62,7 @@ Usage
 ```javascript
 import {
   createLens,
+  over,
   lift
 } from 'bifocal';
 
@@ -74,6 +75,8 @@ aLens({ a: 1 }); // => 1
 aLens({ a: 1 }, 2); // => { a: 2 }
 
 const sqr = x => x * x;
+
+over(aLens, sqr, { a: 2 }); // => { a: 4 }
 
 const sqrA = lift(aLens, sqr)
 sqrA({ a: 2 }); // => { a: 4 }
