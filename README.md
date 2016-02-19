@@ -145,7 +145,7 @@ const sqrA = lift(aLens, sqr)
 sqrA({ a: 2 }); // => { a: 4 }
 ```
 
-###`over(lens, f, value)
+###`over(lens, f, value)`
 
 Apply a function `over` a lens. Equivalent to lifting and then applying.
 Conceptually similar to `map`.
