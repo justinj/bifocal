@@ -1,10 +1,12 @@
 {
   "name": "bifocal",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Tiny abstract lens library",
-  "main": "index.js",
+  "main": "dist.js",
   "scripts": {
-    "test": "mocha --compilers js:babel-core/register"
+    "test": "mocha --compilers js:babel-core/register",
+    "build": "babel index.js -o dist.js",
+    "prepublish": "npm run build"
   },
   "keywords": [
     "lens"
