@@ -295,7 +295,7 @@ Another sort of weird example: the division algorithm says that given numbers
 ```
 n = qm + r
 ```
-where r < n.
+where r < m.
 
 So for example, if `m = 102` and `n = 5`, then `q = 20` and `r = 2`.
 
