@@ -12,6 +12,13 @@
     "lens"
   ],
   "author": "Justin Jaffray",
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/npm/npm.git"
+  },
+  "bugs": {
+    "url": "https://github.com/justinj/bifocal/issues"
+  },
   "license": "MIT",
   "devDependencies": {
     "babel-core": "^6.2.1",
@@ -19,5 +26,6 @@
     "babel-preset-stage-2": "^6.1.18",
     "immutable": "^3.7.5",
     "mocha": "^2.3.4"
-  }
+  },
+  "dependencies": {}
 }
