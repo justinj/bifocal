@@ -84,9 +84,9 @@ sqrA({ a: 2 }); // => { a: 4 }
 
 See `test.js` for more detailed examples.
 
-##API
+## API
 
-###`createLens(get, put)`
+### `createLens(get, put)`
 
 A convenience helper to create a lens. If you want to you can just create
 the lenses directly, but this lets you avoid the logic of checking the
@@ -100,7 +100,7 @@ let aLens = createLens(
   (obj, a) => ({...obj, a})
 );
 ```
-###`compose(...lenses)`
+### `compose(...lenses)`
 
 Compose a sequence of lenses from right to left.
 
@@ -115,7 +115,7 @@ abLens({ a: { b: 3 }}); // => 3
 abLens({ a: { b: 3 }}, 4); // => { a: { b: 4 }}
 ```
 
-###`fromPath(...path)`
+### `fromPath(...path)`
 
 Create a lens which looks into a deeply nested object.
 
@@ -132,7 +132,7 @@ This is to mimic property access (`x.a.b`) which goes in reverse order to
 function application (`b(a(x))`).
 
 
-###`lift(lens, f)`
+### `lift(lens, f)`
 
 "Lift" `f` into the world of `lens`.
 If L is a lens from A to B, and F is a function from B -> B, then lift(L, F)
@@ -145,7 +145,7 @@ const sqrA = lift(aLens, sqr)
 sqrA({ a: 2 }); // => { a: 4 }
 ```
 
-###`over(lens, f, value)`
+### `over(lens, f, value)`
 
 Apply a function `over` a lens. Equivalent to lifting and then applying.
 Conceptually similar to `map`.
@@ -155,7 +155,7 @@ Example:
 over(aLens, sqr, { a: 2 }); // => { a: 4 }
 ```
 
-###`combineLenses({ <name>: lens, ... })`
+### `combineLenses({ <name>: lens, ... })`
 
 Given an object of lenses, creates a lens which gives an object with the
 same structure, with the value of each lens as its values.
@@ -190,15 +190,15 @@ lens({
 }
 ```
 
-###`fromPathImmutable(...path)`
+### `fromPathImmutable(...path)`
 
 Like fromPath, but for collections from [ImmutableJS](https://github.com/facebook/immutable-js).
 
-##Extra Stuff
+## Extra Stuff
 
 You don't need to read this, but it might be interesting/helpful.
 
-###Lenses that make sense
+### Lenses that make sense
 
 You might notice that we can't use any old functions with `createLens` to get a
 lens that always works properly.
@@ -219,7 +219,7 @@ over(what, x => x + 1, [1, 100]); // => [1, 2]
 
 To avoid this, there are 3 rules that if followed, guarantee a lens will work in a way that is reasonable.
 
-###1: Put-Put
+### 1: Put-Put
 
 If we put something into a value, and then put something else, it should be as if we only put the second thing.
 
@@ -228,7 +228,7 @@ That is,
 lens(lens(x, a), b) === lens(x, b)
 ```
 
-###2: Put-Get
+### 2: Put-Get
 
 If we put something into a value using a lens, and then read from the result, we should get back what we put.
 
@@ -237,7 +237,7 @@ Meaning,
 lens(lens(x, a)) === a
 ```
 
-###3: Get-Put
+### 3: Get-Put
 
 If we read something from a value using a lens, and then put that thing back, nothing should change.
 
@@ -247,7 +247,7 @@ lens(x, lens(x)) === x
 
 (this is the one that the lens `what` above, breaks)
 
-###More lenses
+### More lenses
 
 The most obvious kind of lens is one that looks at a small part of a large value, like `fstLens` does.
 You can do this basically any time you have a function whose operation can be reversed given the original value.
